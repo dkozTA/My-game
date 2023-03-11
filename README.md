@@ -1,2 +1,2 @@
 #Game project: Space shooter.
--Haven't done anything-
+-Haven't done anything yet-
