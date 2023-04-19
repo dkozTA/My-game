@@ -1,5 +1,6 @@
 #OBJS specifies which files to compile as part of the project
-OBJS = main.cpp
+OBJS = main.cpp Game.cpp TextureManager.cpp GameObject.cpp Map.cpp Vector2D.cpp 
+
 #CC specifies which compiler we're using
 CC = g++
 
@@ -12,8 +13,7 @@ LIBRARY_PATHS = -L src\lib
 #COMPILER_FLAGS specifies the additional compilation options we're using
 # -w suppresses all warnings
 # -Wl,-subsystem,windows gets rid of the console window
-COMPILER_FLAGS = -w -Wl,-subsystem,windows
-
+COMPILER_FLAGS = -w 
 #LINKER_FLAGS specifies the libraries we're linking against
 LINKER_FLAGS = -lmingw32 -lSDL2main -lSDL2 -lSDL2_image
 
@@ -23,4 +23,4 @@ OBJ_NAME = main
 #This is the target that compiles our executable
 all : $(OBJS)
 	$(CC) $(OBJS) $(INCLUDE_PATHS) $(LIBRARY_PATHS) $(COMPILER_FLAGS) $(LINKER_FLAGS) -o $(OBJ_NAME)
-	./$(OBJ_NAME)
+	.\$(OBJ_NAME)
