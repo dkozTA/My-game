@@ -1,5 +1,5 @@
 #OBJS specifies which files to compile as part of the project
-OBJS = main.cpp Game.cpp TextureManager.cpp GameObject.cpp Map.cpp Vector2D.cpp 
+OBJS = main.cpp Game.cpp TextureManager.cpp Vector2D.cpp Collision.cpp Layout.cpp AssetManager.cpp ECS/ECS.cpp
 
 #CC specifies which compiler we're using
 CC = g++
@@ -15,10 +15,10 @@ LIBRARY_PATHS = -L src\lib
 # -Wl,-subsystem,windows gets rid of the console window
 COMPILER_FLAGS = -w 
 #LINKER_FLAGS specifies the libraries we're linking against
-LINKER_FLAGS = -lmingw32 -lSDL2main -lSDL2 -lSDL2_image
+LINKER_FLAGS = -lmingw32 -lSDL2main -lSDL2 -lSDL2_image -lSDL2_ttf
 
 #OBJ_NAME specifies the name of our exectuable
-OBJ_NAME = main
+OBJ_NAME = Space_Invader
 
 #This is the target that compiles our executable
 all : $(OBJS)
