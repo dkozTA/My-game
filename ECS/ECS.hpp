@@ -160,10 +160,6 @@ public:
 		return groupedEntities[mGroup];
 	}
 
-	int groupSize(Group mGroup)
-	{
-		return groupedEntities[mGroup].size();
-	}
 
 	Entity& addEntity()
 	{

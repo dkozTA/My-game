@@ -27,15 +27,26 @@ void AssetManager::CreateEnemy(Vector2D pos, int width, int height, std::string 
 	enemy.addGroup(Game::groupEnemies);
 }
 
-void AssetManager::CreateProjectile(Vector2D pos, Vector2D velocity, std::string tag)
+void AssetManager::CreatePlayerProjectile(Vector2D pos, Vector2D velocity, std::string tag)
 {
-	auto& projectile(manager->addEntity());
-	projectile.addComponent<TransformComponent>(pos.x, pos.y, 2, 8, 1);
-	projectile.addComponent<SpriteComponent>("projectile");
-	projectile.addComponent<ProjectileComponent>(velocity);
-	projectile.addComponent<ColliderComponent>(tag);
-	projectile.addGroup(Game::groupProjectiles);
+    auto& projectile(manager->addEntity());
+    projectile.addComponent<TransformComponent>(pos.x, pos.y, 2, 8, 1);
+    projectile.addComponent<SpriteComponent>("projectile");
+    projectile.addComponent<ProjectileComponent>(velocity);
+    projectile.addComponent<ColliderComponent>(tag);
+    projectile.addGroup(Game::groupPlayerProjectiles);
 }
+
+void AssetManager::CreateEnemyProjectile(Vector2D pos, Vector2D velocity, std::string tag)
+{
+    auto& projectile(manager->addEntity());
+    projectile.addComponent<TransformComponent>(pos.x, pos.y, 2, 8, 1);
+    projectile.addComponent<SpriteComponent>("projectile");
+    projectile.addComponent<ProjectileComponent>(velocity);
+    projectile.addComponent<ColliderComponent>(tag);
+    projectile.addGroup(Game::groupEnemyProjectiles);
+}
+
 
 void AssetManager::AddTexture(std::string id, const char* path)
 {

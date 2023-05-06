@@ -1,5 +1,3 @@
-//Space Invaders Game built in C++ with SDL2
-
 #include "Game.hpp"
 
 Game *game = nullptr;

@@ -22,14 +22,11 @@ public:
 	void checkAlive();
 	void clean();
 
-	void resetFrameCount() { frameCount = 0; }
-	int getFrameCount() { return frameCount; }
 
 	static bool isRunning;
 	bool running() { return isRunning; }
 
 	static bool fire;
-	bool firing() { return fire; }
 
 	static SDL_Renderer *renderer;
 	static SDL_Event event;
@@ -42,8 +39,11 @@ public:
 		groupEnemies,
 		groupMap,
 		groupColliders,
-		groupProjectiles
+		groupEnemyProjectiles,
+		groupPlayerProjectiles
 	};
+	static const int WINDOW_WIDTH = 460;
+	static const int WINDOW_HEIGHT = 640;
 
 private:
 	bool gameOver = false;

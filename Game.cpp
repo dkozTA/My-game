@@ -17,6 +17,12 @@ AssetManager* Game::assets = new AssetManager(&manager);
 
 std::vector<ColliderComponent*> Game::colliders;
 
+auto& players(manager.getGroup(Game::groupPlayer));
+auto& enemies(manager.getGroup(Game::groupEnemies));
+auto& tiles(manager.getGroup(Game::groupMap));
+auto& p_projectiles(manager.getGroup(Game::groupPlayerProjectiles));
+auto& e_projectiles(manager.getGroup(Game::groupEnemyProjectiles));
+
 auto& player(manager.addEntity());
 auto& label_S(manager.addEntity());
 auto& label_L(manager.addEntity());
@@ -92,10 +98,7 @@ void Game::init(const char * title, int xpos, int ypos, int width, int height, b
 	randNum = rand() % 240;
 }
 
-auto& players(manager.getGroup(Game::groupPlayer));
-auto& enemies(manager.getGroup(Game::groupEnemies));
-auto& tiles(manager.getGroup(Game::groupMap));
-auto& projectiles(manager.getGroup(Game::groupProjectiles));
+
 
 void Game::handleEvents()
 {
@@ -107,10 +110,128 @@ void Game::handleEvents()
 	default:
 		break;
 	}
+	
+}
+
+void Game::update()
+{
+	manager.refresh();
+	manager.update();
+	Vector2D playerPos(0.0f, 0.0f);
+	
+
+	if (!gameOver)
+	{
+		//player position before update for collision detection
+		playerPos = player.getComponent<TransformComponent>().position;
+
+		for (auto& e : enemies)
+		{
+			e->getComponent<SpriteComponent>().setFrameCount(frameCount);
+			e->getComponent<SpriteComponent>().setSpeed(enemySpeed);
+		}
+	}
+
+
+	if(!gameOver)
+	{
+		//prevents firing more than one porjectile at a time
+		for (auto& p : p_projectiles)
+		{
+			if (p->getComponent<ColliderComponent>().tag == "Projectile_P")
+			{
+				fire = false;
+			}
+		}
+
+
+		//fire projectile from player position
+		if (fire)
+		{
+			Vector2D location(player.getComponent<TransformComponent>().position.x + 15.0f, player.getComponent<TransformComponent>().position.y);
+			assets->CreatePlayerProjectile(location, Vector2D(0.0f, -3.0f), "Projectile_P");
+			fire = false;
+		}
+
+		//firing enemy projectiles at random intervals
+		if (frameCount >= randNum)
+		{
+			randNum += rand() % (240 - (round * 10));
+			int chance = 20;
+			bool fired = false;
+
+			while (!fired && chance > 0)
+			{
+				for (auto& e : enemies)
+				{
+					if (rand() % chance == 0)
+					{
+						Vector2D location(e->getComponent<TransformComponent>().position.x + 15.0f, e->getComponent<TransformComponent>().position.y);
+						assets->CreateEnemyProjectile(location, Vector2D(0.0f, 2.0f), "Projectile_E");
+						fired = true;
+						break;
+					}
+				}
+
+				chance--;
+			}
+		}
+
+
+		
+		
+		
+	}
+
+	if (!gameOver)
+	{
+		std::stringstream ss;
+		//collider between player and enemies projectile
+		for (auto& e : e_projectiles)
+		{
+			for (auto& p : players)
+			{
+				if (Collision::AABB(p->getComponent<ColliderComponent>().collider, e->getComponent<ColliderComponent>().collider))
+				{	
+					e->destroy();
+					lives--;
+					ss << "Lives: " << lives;
+					label_L.getComponent<UILabelComponent>().SetLabelText(ss.str(), "verdana");
+					
+					if (lives <= 0)
+					{
+						gameOver = true;
+					}
+				}
+			}
+		}
+
+		//collsion dectection between player projectile and enemies
+		for (auto& p : p_projectiles)
+		{
+			for (auto& e : enemies)
+			{
+				if (Collision::AABB(e->getComponent<ColliderComponent>().collider, p->getComponent<ColliderComponent>().collider))
+				{
+					std::cout<< e->getComponent<ColliderComponent>().collider.y << std::endl;
+					score += 10;
+					ss << "Score: " << score;
+					label_S.getComponent<UILabelComponent>().SetLabelText(ss.str(), "verdana");
+					p->destroy();
+					e->destroy();
+					break;
+				}
+			}
+	}
+		
+	}
+
+	frameCount++;
+
 	if (!gameOver)
 	{
 		//all enemies defeated, starting next round
-		if (manager.groupSize(Game::groupEnemies) == 0)
+		if (enemies.size() == 0)
 		{
 			round++;
 			score += 100;
@@ -135,72 +256,6 @@ void Game::handleEvents()
 				}
 			}
 		}
-
-		//firing enemy projectiles at random intervals
-		if (frameCount >= randNum)
-		{
-			randNum += rand() % (240 - (round * 10));
-			int chance = 20;
-			bool fired = false;
-
-			while (!fired && chance > 0)
-			{
-				for (auto& e : enemies)
-				{
-					if (rand() % chance == 0)
-					{
-						Vector2D location(e->getComponent<TransformComponent>().position.x + 15.0f, e->getComponent<TransformComponent>().position.y);
-						assets->CreateProjectile(location, Vector2D(0.0f, 2.0f), "Projectile_E");
-						fired = true;
-						break;
-					}
-				}
-
-				chance--;
-			}
-		}
-	}
-}
-
-void Game::update()
-{
-	Vector2D playerPos(0.0f, 0.0f);
-
-	if (!gameOver)
-	{
-		//player position before update for collision detection
-		playerPos = player.getComponent<TransformComponent>().position;
-
-		for (auto& e : enemies)
-		{
-			e->getComponent<SpriteComponent>().setFrameCount(frameCount);
-			e->getComponent<SpriteComponent>().setSpeed(enemySpeed);
-		}
-	}
-
-	manager.refresh();
-	manager.update();
-
-	if(!gameOver)
-	{
-		//prevents firing more than one porjectile at a time
-		for (auto& p : projectiles)
-		{
-			if (p->getComponent<ColliderComponent>().tag == "Projectile_P")
-			{
-				fire = false;
-			}
-		}
-
-
-		//fire projectile from player position
-		if (fire)
-		{
-			Vector2D location(player.getComponent<TransformComponent>().position.x + 15.0f, player.getComponent<TransformComponent>().position.y);
-			assets->CreateProjectile(location, Vector2D(0.0f, -3.0f), "Projectile_P");
-			fire = false;
-		}
-
 
 		//enemy movement
 		if (frameCount % enemySpeed == 0)
@@ -248,63 +303,8 @@ void Game::update()
 				}
 			}
 		}
-		//collision detection
-		for (auto& c : colliders)
-		{
-			//player and wall detection
-			if (c->tag == "Wall")
-			{
-				if (Collision::AABB(player.getComponent<ColliderComponent>(), *c))
-				{
-					player.getComponent<TransformComponent>().position = playerPos;
-				}
-			}
-
-			//player and enemy projectile detection
-			else if (c->tag == "Projectile_E" && !(c->entity->getComponent<ProjectileComponent>().hasCollided()))
-			{
-				if (Collision::AABB(player.getComponent<ColliderComponent>(), *c))
-				{
-					c->entity->destroy();
-					c->entity->getComponent<ProjectileComponent>().setCollided();
-
-					lives--;
-					if (lives <= 0)
-					{
-						gameOver = true;
-					}
-
-					std::stringstream ss;
-					ss << "Lives: " << lives;
-					label_L.getComponent<UILabelComponent>().SetLabelText(ss.str(), "verdana");
-				}
-			}
-
-			//player projectile and enemy detection
-			else if (c->tag == "Projectile_P" && !(c->entity->getComponent<ProjectileComponent>().hasCollided()))
-			{
-				for (auto& e : enemies)
-				{
-					if (Collision::AABB(e->getComponent<ColliderComponent>(), *c))
-					{
-						c->entity->destroy();
-						e->destroy();
-						c->entity->getComponent<ProjectileComponent>().setCollided();
-
-						score += 10;
-
-						std::stringstream ss;
-						ss << "Score: " << score;
-						label_S.getComponent<UILabelComponent>().SetLabelText(ss.str(), "verdana");
-
-						break;
-					}
-				}
-			}
-		}
+		
 	}
-
-	frameCount++;
 }
 
 void Game::render()
@@ -313,9 +313,13 @@ void Game::render()
 	
 	if (!gameOver)
 	{
-		for (auto& p : projectiles)
+		for (auto& pp : p_projectiles)
 		{
-			p->draw();
+			pp->draw();
+		}
+		for (auto& ep : e_projectiles)
+		{
+			ep->draw();
 		}
 		for (auto& p : players)
 		{
@@ -347,7 +351,15 @@ void Game::checkAlive()
 {
 	if (gameOver && !gameEndCheck)
 	{
-		for (auto& p : projectiles)
+		for (auto& pp : p_projectiles)
+		{
+			pp->destroy();
+		}
+		for (auto& ep : e_projectiles)
+		{
+			ep->destroy();
+		}
+		for (auto& p : players)
 		{
 			p->destroy();
 		}
@@ -371,6 +383,3 @@ void Game::clean()
 	SDL_Quit();
 	std::cout << "Game Cleaned!..." << std::endl;
 }
-
-//Program received signal SIGSEGV, Segmentation fault.
-//0x75d6d456 in msvcrt!memcmp () from C:\WINDOWS\SysWOW64\msvcrt.dll

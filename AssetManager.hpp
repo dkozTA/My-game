@@ -14,8 +14,8 @@ public:
 
 	void CreateWall(Vector2D pos, int width, int height, std::string id);
 	void CreateEnemy(Vector2D pos, int width, int height, std::string id);
-	void CreateProjectile(Vector2D pos, Vector2D velocity, std::string tag);
-
+	void CreatePlayerProjectile(Vector2D pos, Vector2D velocity, std::string tag);
+	void CreateEnemyProjectile(Vector2D pos, Vector2D velocity, std::string tag);
 
 	void AddTexture(std::string id, const char* path);
 	SDL_Texture* GetTexture(std::string id);

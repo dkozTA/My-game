@@ -64,5 +64,21 @@ public:
 				break;
 			}
 		}
+
+		//check if the player go out of the screen and put it back
+        float xpos = transform->position.x;
+        float ypos = transform->position.y;
+
+        if(xpos < 0)
+            transform->position.x = 0;
+
+        if(ypos < 0)
+            transform->position.y = 0;
+
+        if(xpos > Game::WINDOW_WIDTH - transform->width)
+            transform->position.x = Game::WINDOW_WIDTH - transform->width;
+
+        if(ypos > Game::WINDOW_HEIGHT - transform->height)
+            transform->position.y = Game::WINDOW_HEIGHT - transform->height;
 	}
 };

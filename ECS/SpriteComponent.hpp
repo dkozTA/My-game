@@ -19,10 +19,14 @@ private:
 
 public:
 	SpriteComponent() = default;
+
+
 	SpriteComponent(std::string id)
 	{
 		setTexture(id);
 	}
+
+	
 	SpriteComponent(std::string id, int nFrames, int mSpeed)
 	{
 		animated = true;

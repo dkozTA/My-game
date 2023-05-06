@@ -5,7 +5,6 @@ extern Manager manager;
 
 Layout::Layout()
 {
-	
 }
 
 
