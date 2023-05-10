@@ -41,3 +41,10 @@ Bài tập lớn cuối kỳ môn Lập trình nâng cao
 
 - Âm thanh và hình ảnh lấy ở trên mạng.
 - Còn lại em tự mò.
+
+## Những thứ học được qua quá trình thực hiện game
+- Hiểu thêm về cấu trúc của một Project.
+
+- Học thêm về Class, Struct, Con trỏ, và sử dụng các thư viện.
+
+- Bắt đầu hình thành tư duy giải quyết vấn đề.
