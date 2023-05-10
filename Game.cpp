@@ -123,21 +123,27 @@ void Game::handleEvents()
 			}
 			else if (menuRunning){
 				// Pressing play starts the game
-               if (event.key.keysym.sym == SDLK_SPACE)
-               {
-                  menuRunning = false;
-               }
+				if (event.key.keysym.sym == SDLK_SPACE)
+				{
+						menuRunning = false;
+				}
+				else if (event.key.keysym.sym == SDLK_x){
+						isRunning = false;
+				}
 			}
-			else if (!PauseRunning){
+			if (!PauseRunning){
 				//press Ecs to pause
 				if (event.key.keysym.sym == SDLK_ESCAPE){
 					PauseRunning = true;
 				}
 			}
-			else if (!gameOver){
+			else if (PauseRunning){
 				//press Ecs to not pause
 				if (event.key.keysym.sym == SDLK_ESCAPE){
 					PauseRunning = false;
+				}
+				else if (event.key.keysym.sym == SDLK_x){
+					isRunning = false;
 				}
 			}
 			break;
@@ -394,10 +400,10 @@ void Game::mainMenu()
       if (menuRunning)
 	  {
 		// Render text and graphics for menu
+		label_M.addComponent<UILabelComponent>(1, 1, ("product of Quang The Anh-22026554"), "verdana", white);
 		label_M.addComponent<UILabelComponent>(190, 256, ("SPACE INVADER"), "verdana", white);
-		
-		// Render "Press SPACE to start" in white color 
-		label_M.addComponent<UILabelComponent>(170, 272, ("Press Space to start"), "verdana", white);
+		label_M.addComponent<UILabelComponent>(160, 276, ("PRESS SPACE TO START"), "verdana", white);
+		label_M.addComponent<UILabelComponent>(180, 296, ("PRESS X TO QUIT"), "verdana", white);
 	  }
 	  
       SDL_RenderPresent(renderer);
@@ -415,7 +421,8 @@ void Game::pause()
 	{
 		// Render text and graphics for pause
 		label_P.addComponent<UILabelComponent>(190, 256, ("Game Paused!"), "verdana", white);
-		label_P.addComponent<UILabelComponent>(160, 272, ("Press Ecs To Continue"), "verdana", white);
+		label_P.addComponent<UILabelComponent>(160, 276, ("Press Ecs To Continue"), "verdana", white);
+		label_P.addComponent<UILabelComponent>(185, 296, ("Press X To Quit"), "verdana", white);
 	}
 	  
     SDL_RenderPresent(renderer);
