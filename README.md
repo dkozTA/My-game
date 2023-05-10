@@ -4,6 +4,6 @@
             -đã add main menu.
             -đã add pause.
             -đã add continue nếu người chơi hết mạng.
-            -Chưa add nhạc
+            -Chưa add âm thanh
             
 
