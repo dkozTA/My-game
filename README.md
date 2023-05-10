@@ -14,7 +14,7 @@ Bài tập lớn cuối kỳ môn Lập trình nâng cao
 
 - Ấn mũi trên trái hoặc phím "a" để di chuyển sang trái, ấn mũi tên phải hoặc phím "d" để di chuyển sang phải, ấn phím cách để bắn đạn.
 
-- Gameplay theo liên tục, sẽ hết game khi người chơi hết mạng hoặc quái chạm vào cuối màn hình.
+- Gameplay theo liên tục, người chơi sẽ được cho 3 mạng, sẽ hết game khi người chơi hết mạng hoặc quái chạm vào cuối màn hình.
 
 ## Các chức năng
 - MainMenu:
