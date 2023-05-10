@@ -7,6 +7,7 @@ Bài tập lớn cuối kỳ môn Lập trình nâng cao
 ## Mô tả chung
 
 ![Screenshot 2023-05-10 154719](https://github.com/dkozTA/My-game/assets/124289620/8579a75d-bd23-4053-90d1-2dbbcbc30d9a)
+
 - Đây là dạng đơn giản của 1 game thùng Space Invader vào năm 1978.
 
 - Giết mỗi con quái sẽ được + 10 điểm, người chơi sẽ cố gắng lấy được điểm cao nhất.
