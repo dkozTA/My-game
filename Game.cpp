@@ -15,6 +15,10 @@ SDL_Renderer* Game::renderer = nullptr;
 SDL_Event Game::event;
 AssetManager* Game::assets = new AssetManager(&manager);
 
+
+Mix_Chunk* Game::soundEffects[7];
+Mix_Music* Game::BackgroundMusic = NULL;
+
 std::vector<ColliderComponent*> Game::colliders;
 
 auto& players(manager.getGroup(Game::groupPlayer));
@@ -74,13 +78,39 @@ void Game::init(const char * title, int xpos, int ypos, int width, int height, b
 		isRunning = false;
 	}
 
+	if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) == -1)
+    {
+        std::cout << "loi am thanh" << std::endl;
+    }
+
+    soundEffects[0] = Mix_LoadWAV("assets/sound/gameStart.wav");
+    soundEffects[1] = Mix_LoadWAV("assets/sound/playerShoot.wav");
+    soundEffects[2] = Mix_LoadWAV("assets/sound/alienShoot.wav");
+    soundEffects[3] = Mix_LoadWAV("assets/sound/alienExplosion.wav");
+	soundEffects[4] = Mix_LoadWAV("assets/sound/gameOver.wav");
+	soundEffects[5] = Mix_LoadWAV("assets/sound/roundReset.wav");
+	soundEffects[6] = Mix_LoadWAV("assets/sound/playerHit.wav");
+
+
+	BackgroundMusic = Mix_LoadMUS("assets/sound/music.mp3");
+
+	if(Mix_PlayingMusic()==0)
+    {
+        Mix_PlayMusic(BackgroundMusic,-1);
+    }
+    else
+    {
+        if(Mix_PausedMusic()==1) Mix_ResumeMusic();
+        else Mix_PauseMusic();
+    }
+
 	if (TTF_Init() == -1)
 	{
 		std::cout << "Error in SDL_TTF" << std::endl;
 	}
 
-	assets->AddTexture("player", "assets/player.png");
-	assets->AddTexture("projectile", "assets/projectile.png");
+	assets->AddTexture("player", "assets/images/player.png");
+	assets->AddTexture("projectile", "assets/images/projectile.png");
 	assets->AddFont("verdana", "assets/verdana.ttf", 16);
 
 	player.addComponent<TransformComponent>(240.0f, 600.0f, 16, 16, 2);
@@ -160,7 +190,6 @@ void Game::update()
 			manager.refresh();
 			manager.update();
 
-
 			frameCount++;
 			if (!gameOver){
 				for (auto& e : enemies)
@@ -185,13 +214,14 @@ void Game::update()
 					Vector2D location(player.getComponent<TransformComponent>().position.x + 15.0f, player.getComponent<TransformComponent>().position.y);
 					assets->CreatePlayerProjectile(location, Vector2D(0.0f, -3.0f), "Projectile_P");
 					fire = false;
+					Mix_PlayChannel(-1, Game::soundEffects[1], 0);
 				}
 
 				std::stringstream ss;
 				//collider between player and enemies projectile
-				for (auto& ep : e_projectiles)
+				for (auto& p : players)
 				{
-					for (auto& p : players)
+					for (auto& ep : e_projectiles)
 					{
 						if (Collision::AABB(p->getComponent<ColliderComponent>().collider, ep->getComponent<ColliderComponent>().collider))
 						{	
@@ -210,15 +240,17 @@ void Game::update()
 							if (lives < 0)
 							{
 								gameOver = true;
+								Mix_PlayChannel(-1, Game::soundEffects[4], 0);
 							}
+							Mix_PlayChannel(-1, Game::soundEffects[6], 0);
 						}
 					}
 				}
 
 				//collsion dectection between player projectile and enemies
-				for (auto& pp : p_projectiles)
+				for (auto& e : enemies)
 				{
-					for (auto& e : enemies)
+					for (auto& pp : p_projectiles)
 					{
 						if (Collision::AABB(e->getComponent<ColliderComponent>().collider, pp->getComponent<ColliderComponent>().collider))
 						{
@@ -227,7 +259,7 @@ void Game::update()
 							score += 10;
 							ss << "Score: " << score;
 							label_S.getComponent<UILabelComponent>().SetLabelText(ss.str(), "verdana");
-							break;
+							Mix_PlayChannel(-1, Game::soundEffects[3], 0);
 						}
 					}
 				}
@@ -249,6 +281,7 @@ void Game::update()
 					reverseDirection = false;
 					Layout::ResetLayout(0);
 					std::cout << round << std::endl;
+					Mix_PlayChannel(-1, Game::soundEffects[5], 0);
 				}
 				else
 				{
@@ -258,6 +291,7 @@ void Game::update()
 						if (e->getComponent<TransformComponent>().position.y >= 568)
 						{
 							gameOver = true;
+							Mix_PlayChannel(-1, Game::soundEffects[4], 0);
 						}
 					}
 				}
@@ -325,6 +359,7 @@ void Game::update()
 								Vector2D location(e->getComponent<TransformComponent>().position.x + 15.0f, e->getComponent<TransformComponent>().position.y);
 								assets->CreateEnemyProjectile(location, Vector2D(0.0f, 2.0f), "Projectile_E");
 								fired = true;
+								Mix_PlayChannel(-1, Game::soundEffects[2], 0);
 								break;
 							}
 						}

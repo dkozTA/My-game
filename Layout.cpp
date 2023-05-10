@@ -16,13 +16,13 @@ void Layout::Draw()
 	auto& wallL(manager.addEntity());
 	auto& wallR(manager.addEntity());
 
-	Game::assets->AddTexture("wall_T", "assets/wall_T.png");
-	Game::assets->AddTexture("wall_B", "assets/wall_B.png");
-	Game::assets->AddTexture("wall_L", "assets/wall_L.png");
-	Game::assets->AddTexture("wall_R", "assets/wall_R.png");
-	Game::assets->AddTexture("enemy_R", "assets/enemy_R.png");
-	Game::assets->AddTexture("enemy_Y", "assets/enemy_Y.png");
-	Game::assets->AddTexture("enemy_G", "assets/enemy_G.png");
+	Game::assets->AddTexture("wall_T", "assets/images/wall_T.png");
+	Game::assets->AddTexture("wall_B", "assets/images/wall_B.png");
+	Game::assets->AddTexture("wall_L", "assets/images/wall_L.png");
+	Game::assets->AddTexture("wall_R", "assets/images/wall_R.png");
+	Game::assets->AddTexture("enemy_R", "assets/images/enemy_R.png");
+	Game::assets->AddTexture("enemy_Y", "assets/images/enemy_Y.png");
+	Game::assets->AddTexture("enemy_G", "assets/images/enemy_G.png");
 
 	Game::assets->CreateWall(Vector2D(0.0f, 0.0f), 480, 2, "wall_T");
 	Game::assets->CreateWall(Vector2D(0.0f, 638.0f), 480, 2, "wall_B");

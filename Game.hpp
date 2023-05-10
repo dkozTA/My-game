@@ -3,6 +3,7 @@
 #include <vector>
 #include "SDL2/SDL.h"
 #include "SDL2/SDL_image.h"
+#include "SDL2/SDL_mixer.h"
 #include "AssetManager.hpp"
 
 class AssetManager;
@@ -44,8 +45,12 @@ public:
 		groupEnemyProjectiles,
 		groupPlayerProjectiles
 	};
+
 	static const int WINDOW_WIDTH = 460;
 	static const int WINDOW_HEIGHT = 640;
+
+	static Mix_Chunk* soundEffects[7];
+	static Mix_Music* BackgroundMusic;
 
 private:
 	bool PauseRunning = false;
