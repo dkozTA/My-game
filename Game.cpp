@@ -28,6 +28,8 @@ auto& label_S(manager.addEntity());
 auto& label_L(manager.addEntity());
 auto& label_E(manager.addEntity());
 auto& label_Q(manager.addEntity());
+auto& label_M(manager.addEntity());
+auto& label_P(manager.addEntity());
 
 bool Game::isRunning = false;
 bool Game::fire = false;
@@ -86,6 +88,7 @@ void Game::init(const char * title, int xpos, int ypos, int width, int height, b
 	player.addComponent<KeyboardController>();
 	player.addComponent<ColliderComponent>("Player");
 	player.addGroup(Game::groupPlayer);
+	
 
 	SDL_Color white = { 255, 255, 255 };
 	label_S.addComponent<UILabelComponent>(8, 8, ("Score: 0"), "verdana", white);
@@ -98,228 +101,256 @@ void Game::init(const char * title, int xpos, int ypos, int width, int height, b
 	randNum = rand() % 240;
 }
 
-
-
 void Game::handleEvents()
 {
 	SDL_PollEvent(&event);
 	switch (event.type) {
-	case SDL_QUIT:
-		isRunning = false;
-		break;
-	default:
-		break;
+		case SDL_QUIT:
+			isRunning = false;
+			break;
+		case SDL_KEYDOWN:
+			if (gameOver){
+				// press n to escape the game
+				if (event.key.keysym.sym == SDLK_n){
+					isRunning = false;
+				}
+				//press y to back to menu
+				if (event.key.keysym.sym == SDLK_y){
+					menuRunning = true;
+					gameOver = false;
+					lives = 3;
+				}
+			}
+			else if (menuRunning){
+				// Pressing play starts the game
+               if (event.key.keysym.sym == SDLK_SPACE)
+               {
+                  menuRunning = false;
+               }
+			}
+			else if (!PauseRunning){
+				//press Ecs to pause
+				if (event.key.keysym.sym == SDLK_ESCAPE){
+					PauseRunning = true;
+				}
+			}
+			else if (!gameOver){
+				//press Ecs to not pause
+				if (event.key.keysym.sym == SDLK_ESCAPE){
+					PauseRunning = false;
+				}
+			}
+			break;
+		default:
+			break;
 	}
 	
 }
 
 void Game::update()
 {
-	manager.refresh();
-	manager.update();
-	Vector2D playerPos(0.0f, 0.0f);
-	
-
-	if (!gameOver)
-	{
-		//player position before update for collision detection
-		playerPos = player.getComponent<TransformComponent>().position;
-
-		for (auto& e : enemies)
-		{
-			e->getComponent<SpriteComponent>().setFrameCount(frameCount);
-			e->getComponent<SpriteComponent>().setSpeed(enemySpeed);
-		}
-	}
+	if (!menuRunning){
+		if (!PauseRunning){
+			manager.refresh();
+			manager.update();
 
 
-	if(!gameOver)
-	{
-		//prevents firing more than one porjectile at a time
-		for (auto& p : p_projectiles)
-		{
-			if (p->getComponent<ColliderComponent>().tag == "Projectile_P")
-			{
-				fire = false;
-			}
-		}
-
-
-		//fire projectile from player position
-		if (fire)
-		{
-			Vector2D location(player.getComponent<TransformComponent>().position.x + 15.0f, player.getComponent<TransformComponent>().position.y);
-			assets->CreatePlayerProjectile(location, Vector2D(0.0f, -3.0f), "Projectile_P");
-			fire = false;
-		}
-
-		//firing enemy projectiles at random intervals
-		if (frameCount >= randNum)
-		{
-			randNum += rand() % (240 - (round * 10));
-			int chance = 20;
-			bool fired = false;
-
-			while (!fired && chance > 0)
-			{
+			frameCount++;
+			if (!gameOver){
 				for (auto& e : enemies)
-				{
-					if (rand() % chance == 0)
 					{
-						Vector2D location(e->getComponent<TransformComponent>().position.x + 15.0f, e->getComponent<TransformComponent>().position.y);
-						assets->CreateEnemyProjectile(location, Vector2D(0.0f, 2.0f), "Projectile_E");
-						fired = true;
-						break;
+						e->getComponent<SpriteComponent>().setFrameCount(frameCount);
+						e->getComponent<SpriteComponent>().setSpeed(enemySpeed);
+					}
+			
+
+
+				//prevents firing more than one porjectile at a time
+				for (auto& pp : p_projectiles)
+				{
+					if (pp->getComponent<ColliderComponent>().tag == "Projectile_P")
+					{
+						fire = false;
 					}
 				}
 
-				chance--;
-			}
-		}
+				if (fire){
+					//fire projectile from player position
+					Vector2D location(player.getComponent<TransformComponent>().position.x + 15.0f, player.getComponent<TransformComponent>().position.y);
+					assets->CreatePlayerProjectile(location, Vector2D(0.0f, -3.0f), "Projectile_P");
+					fire = false;
+				}
 
-
-		
-		
-		
-	}
-
-	if (!gameOver)
-	{
-		std::stringstream ss;
-		//collider between player and enemies projectile
-		for (auto& e : e_projectiles)
-		{
-			for (auto& p : players)
-			{
-				if (Collision::AABB(p->getComponent<ColliderComponent>().collider, e->getComponent<ColliderComponent>().collider))
-				{	
-					e->destroy();
-					lives--;
-					ss << "Lives: " << lives;
-					label_L.getComponent<UILabelComponent>().SetLabelText(ss.str(), "verdana");
-					
-					if (lives <= 0)
+				std::stringstream ss;
+				//collider between player and enemies projectile
+				for (auto& ep : e_projectiles)
+				{
+					for (auto& p : players)
 					{
-						gameOver = true;
+						if (Collision::AABB(p->getComponent<ColliderComponent>().collider, ep->getComponent<ColliderComponent>().collider))
+						{	
+							ep->destroy();
+							lives--;
+							if (lives < 0)
+							{
+								ss << "Lives: " << 3;
+							}
+							else
+							{
+								ss << "Lives: " << lives;
+							}
+							label_L.getComponent<UILabelComponent>().SetLabelText(ss.str(), "verdana");
+							
+							if (lives < 0)
+							{
+								gameOver = true;
+							}
+						}
 					}
 				}
-			}
-		}
 
-		//collsion dectection between player projectile and enemies
-		for (auto& p : p_projectiles)
-		{
-			for (auto& e : enemies)
-			{
-				if (Collision::AABB(e->getComponent<ColliderComponent>().collider, p->getComponent<ColliderComponent>().collider))
+				//collsion dectection between player projectile and enemies
+				for (auto& pp : p_projectiles)
 				{
-					std::cout<< e->getComponent<ColliderComponent>().collider.y << std::endl;
-					score += 10;
-					ss << "Score: " << score;
-					label_S.getComponent<UILabelComponent>().SetLabelText(ss.str(), "verdana");
-					p->destroy();
-					e->destroy();
-					break;
-				}
-			}
-	}
-		
-	}
-
-	frameCount++;
-
-	if (!gameOver)
-	{
-		//all enemies defeated, starting next round
-		if (enemies.size() == 0)
-		{
-			round++;
-			score += 100;
-			enemySpeed = 60 - (5 * round);
-			if (enemySpeed < 10)
-			{
-				enemySpeed = 10;
-			}
-			reverseCheck = false;
-			reverseDirection = false;
-			Layout::ResetLayout(round);
-			std::cout << round << std::endl;
-		}
-		else
-		{
-			//have enemies reached bottom of screen?
-			for (auto& e : enemies)
-			{
-				if (e->getComponent<TransformComponent>().position.y >= 568)
-				{
-					gameOver = true;
-				}
-			}
-		}
-
-		//enemy movement
-		if (frameCount % enemySpeed == 0)
-		{
-			Vector2D vSide(8.0f, 0.0f);
-			if (reverseDirection)
-			{
-				Vector2D vRev(-1.0f, 0.0f);
-				vSide.Multiply(vRev);
-			}
-
-			//reverse direction if needed and speed up enemy movement + animation
-			if (reverseCheck)
-			{
-				Vector2D vDown(0.0f, 48.0f);
-				for (auto& e : enemies)
-				{
-					e->getComponent<TransformComponent>().position.Add(vDown);
-				}
-
-				if (enemySpeed > 20)
-				{
-					enemySpeed -= 10;
-				}
-				else if (enemySpeed > 10)
-				{
-					enemySpeed -= 5;
-				}
-
-
-				reverseDirection = !reverseDirection;
-				reverseCheck = false;
-			}
-			else
-			{
-				for (auto& e : enemies)
-				{
-					e->getComponent<TransformComponent>().position.Add(vSide);
-
-					if (e->getComponent<TransformComponent>().position.x <= 8 ||
-						e->getComponent<TransformComponent>().position.x >= 438)
+					for (auto& e : enemies)
 					{
-						reverseCheck = true;
+						if (Collision::AABB(e->getComponent<ColliderComponent>().collider, pp->getComponent<ColliderComponent>().collider))
+						{
+							pp->destroy();
+							e->destroy();
+							score += 10;
+							ss << "Score: " << score;
+							label_S.getComponent<UILabelComponent>().SetLabelText(ss.str(), "verdana");
+							break;
+						}
+					}
+				}
+			
+				
+			
+
+				//all enemies defeated, starting next round
+				if (enemies.size() == 0)
+				{
+					round++;
+					score += 100;
+					enemySpeed = 60 - (5 * round);
+					if (enemySpeed < 10)
+					{
+						enemySpeed = 10;
+					}
+					reverseCheck = false;
+					reverseDirection = false;
+					Layout::ResetLayout(0);
+					std::cout << round << std::endl;
+				}
+				else
+				{
+					//have enemies reached bottom of screen?
+					for (auto& e : enemies)
+					{
+						if (e->getComponent<TransformComponent>().position.y >= 568)
+						{
+							gameOver = true;
+						}
+					}
+				}
+
+				//enemy movement
+				if (frameCount % enemySpeed == 0)
+				{
+					Vector2D vSide(8.0f, 0.0f);
+					if (reverseDirection)
+					{
+						Vector2D vRev(-1.0f, 0.0f);
+						vSide.Multiply(vRev);
+					}
+
+					//reverse direction if needed and speed up enemy movement + animation
+					if (reverseCheck)
+					{
+						Vector2D vDown(0.0f, 48.0f);
+						for (auto& e : enemies)
+						{
+							e->getComponent<TransformComponent>().position.Add(vDown);
+						}
+
+						if (enemySpeed > 20)
+						{
+							enemySpeed -= 10;
+						}
+						else if (enemySpeed > 10)
+						{
+							enemySpeed -= 5;
+						}
+
+
+						reverseDirection = !reverseDirection;
+						reverseCheck = false;
+					}
+					else
+					{
+						for (auto& e : enemies)
+						{
+							e->getComponent<TransformComponent>().position.Add(vSide);
+
+							if (e->getComponent<TransformComponent>().position.x <= 8 ||
+								e->getComponent<TransformComponent>().position.x >= 438)
+							{
+								reverseCheck = true;
+							}
+						}
+					}
+				}
+
+				//firing enemy projectiles at random intervals
+				if (frameCount >= randNum)
+				{
+					randNum += rand() % (240 - (round * 10));
+					int chance = 20;
+					bool fired = false;
+
+					while (!fired && chance > 0)
+					{
+						for (auto& e : enemies)
+						{
+							if (rand() % chance == 0)
+							{
+								Vector2D location(e->getComponent<TransformComponent>().position.x + 15.0f, e->getComponent<TransformComponent>().position.y);
+								assets->CreateEnemyProjectile(location, Vector2D(0.0f, 2.0f), "Projectile_E");
+								fired = true;
+								break;
+							}
+						}
+
+						chance--;
 					}
 				}
 			}
 		}
-		
 	}
 }
 
 void Game::render()
 {
 	SDL_RenderClear(renderer);
-	
-	if (!gameOver)
+
+	if (menuRunning)
 	{
-		for (auto& pp : p_projectiles)
+		label_M.draw();
+	}
+
+	else if (PauseRunning)
+	{
+		label_P.draw();
+	}
+	
+	else if (!gameOver)
+	{
+		
+		for (auto& t : tiles)
 		{
-			pp->draw();
-		}
-		for (auto& ep : e_projectiles)
-		{
-			ep->draw();
+			t->draw();
 		}
 		for (auto& p : players)
 		{
@@ -329,14 +360,18 @@ void Game::render()
 		{
 			e->draw();
 		}
-		for (auto& t : tiles)
+		for (auto& pp : p_projectiles)
 		{
-			t->draw();
+			pp->draw();
 		}
+		for (auto& ep : e_projectiles)
+		{
+			ep->draw();
+		}
+		label_S.draw();
+		label_L.draw();
 	}
 
-	label_S.draw();
-	label_L.draw();
 
 	if (gameOver)
 	{
@@ -347,30 +382,65 @@ void Game::render()
 	SDL_RenderPresent(renderer);
 }
 
+void Game::mainMenu()
+{
+      
+      // Render menu
+      SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+      SDL_RenderClear(renderer);
+
+	  SDL_Color white = { 255, 255, 255 };
+
+      if (menuRunning)
+	  {
+		// Render text and graphics for menu
+		label_M.addComponent<UILabelComponent>(190, 256, ("SPACE INVADER"), "verdana", white);
+		
+		// Render "Press SPACE to start" in white color 
+		label_M.addComponent<UILabelComponent>(170, 272, ("Press Space to start"), "verdana", white);
+	  }
+	  
+      SDL_RenderPresent(renderer);
+}
+
+void Game::pause()
+{
+	// Render pause screen
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+	SDL_RenderClear(renderer);
+
+	SDL_Color white = { 255, 255, 255 };
+
+    if (!PauseRunning)
+	{
+		// Render text and graphics for pause
+		label_P.addComponent<UILabelComponent>(190, 256, ("Game Paused!"), "verdana", white);
+		label_P.addComponent<UILabelComponent>(160, 272, ("Press Ecs To Continue"), "verdana", white);
+	}
+	  
+    SDL_RenderPresent(renderer);
+}
+
 void Game::checkAlive()
 {
 	if (gameOver && !gameEndCheck)
 	{
-		for (auto& pp : p_projectiles)
+		for (auto& e : enemies)
 		{
-			pp->destroy();
+			e->destroy();
 		}
 		for (auto& ep : e_projectiles)
 		{
 			ep->destroy();
 		}
-		for (auto& p : players)
+		for (auto& pp : p_projectiles)
 		{
-			p->destroy();
-		}
-		for (auto& e : enemies)
-		{
-			e->destroy();
+			pp->destroy();
 		}
 
 		SDL_Color white = { 255, 255, 255 };
 		label_E.addComponent<UILabelComponent>(190, 256, ("Game Over"), "verdana", white);
-		label_Q.addComponent<UILabelComponent>(190, 272, ("Esc to Quit"), "verdana", white);
+		label_Q.addComponent<UILabelComponent>(110, 272, ("Press y to back to menu, n to quit."), "verdana", white);
 
 		gameEndCheck = true;
 	}

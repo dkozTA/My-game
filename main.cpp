@@ -11,7 +11,9 @@ int main(int argc, char * argv[]) {
 	int frameTime;
 
 	game = new Game();
-	game->init("Engine", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 480, 640, false);
+	game->init("SPACE_INVADER", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 480, 640, false);
+	game->mainMenu();
+	game->pause();
 
 	while (game->running())
 	{

@@ -57,9 +57,6 @@ public:
 			case SDLK_d:
 				transform->velocity.x = 0;
 				break;
-			case SDLK_ESCAPE:
-				Game::isRunning = false;
-				break;
 			default:
 				break;
 			}

@@ -21,6 +21,8 @@ public:
 	void render();
 	void checkAlive();
 	void clean();
+	void mainMenu();
+	void pause();
 
 
 	static bool isRunning;
@@ -46,6 +48,8 @@ public:
 	static const int WINDOW_HEIGHT = 640;
 
 private:
+	bool PauseRunning = false;
+	bool menuRunning = true;
 	bool gameOver = false;
 	bool gameEndCheck = false;
 	int frameCount = 0;
