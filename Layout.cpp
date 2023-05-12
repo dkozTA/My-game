@@ -39,8 +39,10 @@ void Layout::ResetLayout(int round)
 		round = 8;
 	}
 
+	//number of enemies row
 	for (int k = 0; k < 5; k++)
 	{
+		//number of enemies per row
 		for (int i = 0; i < 8; i++)
 		{
 			float x = static_cast<float>(16 + (i * 32 + i * 8));

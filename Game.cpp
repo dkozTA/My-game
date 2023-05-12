@@ -15,7 +15,6 @@ SDL_Renderer* Game::renderer = nullptr;
 SDL_Event Game::event;
 AssetManager* Game::assets = new AssetManager(&manager);
 
-
 Mix_Chunk* Game::soundEffects[7];
 Mix_Music* Game::BackgroundMusic = NULL;
 
@@ -80,7 +79,7 @@ void Game::init(const char * title, int xpos, int ypos, int width, int height, b
 
 	if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) == -1)
     {
-        std::cout << "loi am thanh" << std::endl;
+        std::cout << "can't open audio" << std::endl;
     }
 
     soundEffects[0] = Mix_LoadWAV("assets/sound/gameStart.wav");
@@ -110,7 +109,8 @@ void Game::init(const char * title, int xpos, int ypos, int width, int height, b
 	}
 
 	assets->AddTexture("player", "assets/images/player.png");
-	assets->AddTexture("projectile", "assets/images/projectile.png");
+	assets->AddTexture("Projectile_E", "assets/images/projectile.png");
+	assets->AddTexture("Projectile_P", "assets/images/projectile.png");
 	assets->AddFont("verdana", "assets/verdana.ttf", 16);
 
 	player.addComponent<TransformComponent>(240.0f, 600.0f, 16, 16, 2);
@@ -148,10 +148,18 @@ void Game::handleEvents()
 				if (event.key.keysym.sym == SDLK_y){
 					menuRunning = true;
 					gameOver = false;
+					score = 0;
+					round = 0;
 					lives = 3;
 				}
 			}
-			else if (menuRunning){
+			else if (!gameOver){
+				if (event.key.keysym.sym == SDLK_t){
+					gameEndCheck = true;
+				}
+			}
+			
+			if (menuRunning){
 				// Pressing play starts the game
 				if (event.key.keysym.sym == SDLK_SPACE)
 				{
@@ -192,13 +200,16 @@ void Game::update()
 
 			frameCount++;
 			if (!gameOver){
+
+				//enemies sprite
 				for (auto& e : enemies)
-					{
-						e->getComponent<SpriteComponent>().setFrameCount(frameCount);
-						e->getComponent<SpriteComponent>().setSpeed(enemySpeed);
-					}
+				{
+					e->getComponent<SpriteComponent>().setFrameCount(frameCount);
+					e->getComponent<SpriteComponent>().setSpeed(enemySpeed);
+				}
 			
 
+				
 
 				//prevents firing more than one porjectile at a time
 				for (auto& pp : p_projectiles)
@@ -212,90 +223,16 @@ void Game::update()
 				if (fire){
 					//fire projectile from player position
 					Vector2D location(player.getComponent<TransformComponent>().position.x + 15.0f, player.getComponent<TransformComponent>().position.y);
+					//std::cout << "Player Projectile Location: x = " << location.x << ", y = " << location.y << std::endl; //add this line
 					assets->CreatePlayerProjectile(location, Vector2D(0.0f, -3.0f), "Projectile_P");
 					fire = false;
 					Mix_PlayChannel(-1, Game::soundEffects[1], 0);
 				}
 
+
 				std::stringstream ss;
-				//collider between player and enemies projectile
-				for (auto& p : players)
-				{
-					for (auto& ep : e_projectiles)
-					{
-						if (Collision::AABB(p->getComponent<ColliderComponent>().collider, ep->getComponent<ColliderComponent>().collider))
-						{	
-							ep->destroy();
-							lives--;
-							if (lives < 0)
-							{
-								ss << "Lives: " << 3;
-							}
-							else
-							{
-								ss << "Lives: " << lives;
-							}
-							label_L.getComponent<UILabelComponent>().SetLabelText(ss.str(), "verdana");
-							
-							if (lives < 0)
-							{
-								gameOver = true;
-								Mix_PlayChannel(-1, Game::soundEffects[4], 0);
-							}
-							Mix_PlayChannel(-1, Game::soundEffects[6], 0);
-						}
-					}
-				}
 
-				//collsion dectection between player projectile and enemies
-				for (auto& e : enemies)
-				{
-					for (auto& pp : p_projectiles)
-					{
-						if (Collision::AABB(e->getComponent<ColliderComponent>().collider, pp->getComponent<ColliderComponent>().collider))
-						{
-							pp->destroy();
-							e->destroy();
-							score += 10;
-							ss << "Score: " << score;
-							label_S.getComponent<UILabelComponent>().SetLabelText(ss.str(), "verdana");
-							Mix_PlayChannel(-1, Game::soundEffects[3], 0);
-						}
-					}
-				}
-			
 				
-			
-
-				//all enemies defeated, starting next round
-				if (enemies.size() == 0)
-				{
-					round++;
-					score += 100;
-					enemySpeed = 60 - (5 * round);
-					if (enemySpeed < 10)
-					{
-						enemySpeed = 10;
-					}
-					reverseCheck = false;
-					reverseDirection = false;
-					Layout::ResetLayout(0);
-					std::cout << round << std::endl;
-					Mix_PlayChannel(-1, Game::soundEffects[5], 0);
-				}
-				else
-				{
-					//have enemies reached bottom of screen?
-					for (auto& e : enemies)
-					{
-						if (e->getComponent<TransformComponent>().position.y >= 568)
-						{
-							gameOver = true;
-							Mix_PlayChannel(-1, Game::soundEffects[4], 0);
-						}
-					}
-				}
-
 				//enemy movement
 				if (frameCount % enemySpeed == 0)
 				{
@@ -365,6 +302,84 @@ void Game::update()
 						}
 
 						chance--;
+					}
+				}
+
+				//all enemies defeated, starting next round
+				if (enemies.size() == 0 && !gameOver)
+				{
+					round++;
+					score += 100;
+					enemySpeed = 60 - (5 * round);
+					if (enemySpeed < 10)
+					{
+						enemySpeed = 10;
+					}
+					reverseCheck = false;
+					reverseDirection = false;
+					Layout::ResetLayout(0);
+					std::cout << round << std::endl;
+					Mix_PlayChannel(-1, Game::soundEffects[5], 0);
+				}
+				else
+				{
+					//have enemies reached bottom of screen?
+					for (auto& e : enemies)
+					{
+						if (e->getComponent<TransformComponent>().position.y >= 568)
+						{
+							gameOver = true;
+							score = 0;
+							round = 0;
+							Mix_PlayChannel(-1, Game::soundEffects[4], 0);
+						}
+					}
+				}
+
+				//collider between player and enemies projectile
+				for (auto& ep : e_projectiles)
+				{
+					if (Collision::AABB(player.getComponent<ColliderComponent>().collider, ep->getComponent<ColliderComponent>().collider))
+					{	
+						ep->destroy();
+						lives--;
+						if (lives < 0)
+						{
+							ss << "Lives: " << 3;
+						}
+						else
+						{
+							ss << "Lives: " << lives;
+						}
+						label_L.getComponent<UILabelComponent>().SetLabelText(ss.str(), "verdana");
+						
+						if (lives < 0)
+						{
+							gameOver = true;
+							score = 0;
+							round = 0;
+							Mix_PlayChannel(-1, Game::soundEffects[4], 0);
+						}
+						Mix_PlayChannel(-1, Game::soundEffects[6], 0);
+					}
+				}
+				
+
+				//collsion dectection between player projectile and enemies
+				for (auto& pp : p_projectiles)
+				{
+					for (auto& e : enemies)
+					{
+						if (Collision::AABB(pp->getComponent<ColliderComponent>().collider, e->getComponent<ColliderComponent>().collider))
+						{
+							pp->destroy();
+							e->destroy();
+							score += 10;
+							std::cout<< "hit"<< std::endl;
+							ss << "Score: " << score;
+							label_S.getComponent<UILabelComponent>().SetLabelText(ss.str(), "verdana");
+							Mix_PlayChannel(-1, Game::soundEffects[3], 0);
+						}
 					}
 				}
 			}
@@ -440,7 +455,6 @@ void Game::mainMenu()
 		label_M.addComponent<UILabelComponent>(160, 276, ("PRESS SPACE TO START"), "verdana", white);
 		label_M.addComponent<UILabelComponent>(180, 296, ("PRESS X TO QUIT"), "verdana", white);
 	  }
-	  
       SDL_RenderPresent(renderer);
 }
 
@@ -465,7 +479,7 @@ void Game::pause()
 
 void Game::checkAlive()
 {
-	if (gameOver && !gameEndCheck)
+	if (gameOver)
 	{
 		for (auto& e : enemies)
 		{
@@ -484,7 +498,23 @@ void Game::checkAlive()
 		label_E.addComponent<UILabelComponent>(190, 256, ("Game Over"), "verdana", white);
 		label_Q.addComponent<UILabelComponent>(110, 272, ("Press y to back to menu, n to quit."), "verdana", white);
 
-		gameEndCheck = true;
+	}
+
+	else if (gameEndCheck){
+		for (auto& e : enemies)
+		{
+			e->destroy();
+		}
+		for (auto& ep : e_projectiles)
+		{
+			ep->destroy();
+		}
+		for (auto& pp : p_projectiles)
+		{
+			pp->destroy();
+		}
+
+		gameEndCheck = false;
 	}
 }
 

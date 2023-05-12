@@ -31,7 +31,7 @@ void AssetManager::CreatePlayerProjectile(Vector2D pos, Vector2D velocity, std::
 {
     auto& projectile(manager->addEntity());
     projectile.addComponent<TransformComponent>(pos.x, pos.y, 2, 8, 1);
-    projectile.addComponent<SpriteComponent>("projectile");
+    projectile.addComponent<SpriteComponent>("Projectile_E");
     projectile.addComponent<ProjectileComponent>(velocity);
     projectile.addComponent<ColliderComponent>(tag);
     projectile.addGroup(Game::groupPlayerProjectiles);
@@ -41,7 +41,7 @@ void AssetManager::CreateEnemyProjectile(Vector2D pos, Vector2D velocity, std::s
 {
     auto& projectile(manager->addEntity());
     projectile.addComponent<TransformComponent>(pos.x, pos.y, 2, 8, 1);
-    projectile.addComponent<SpriteComponent>("projectile");
+    projectile.addComponent<SpriteComponent>("Projectile_P");
     projectile.addComponent<ProjectileComponent>(velocity);
     projectile.addComponent<ColliderComponent>(tag);
     projectile.addGroup(Game::groupEnemyProjectiles);
