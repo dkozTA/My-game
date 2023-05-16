@@ -14,7 +14,7 @@ Bài tập lớn cuối kỳ môn Lập trình nâng cao
 
 - Ấn mũi trên trái hoặc phím "a" để di chuyển sang trái, ấn mũi tên phải hoặc phím "d" để di chuyển sang phải, ấn phím cách để bắn đạn.
 
-- Người chơi sẽ được cho 3 mạng, sẽ hết game khi người chơi hết mạng hoặc quái chạm vào cuối màn hình, khi người chơi giết hết quái trong sẽ được tăng lên vòng tiếp theo, số vòng càng cao thì tốc độ của quái sẽ tăng lên và sẽ bắn đạn nhiều hơn.
+- Người chơi sẽ được cho 4 mạng, sẽ hết game khi người chơi hết mạng hoặc quái chạm vào cuối màn hình, khi người chơi giết hết quái trong sẽ được tăng lên vòng tiếp theo, số vòng càng cao thì tốc độ của quái sẽ tăng lên và sẽ bắn đạn nhiều hơn.
 
 ## Các chức năng
 - MainMenu:
